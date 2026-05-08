@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroSync — Psychoacoustic Entrainment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #050B14;
+      --surface:   rgba(15, 23, 42, 0.6);
+      --border:    rgba(255,255,255,0.07);
+      --text:      #e2e8f0;
+      --muted:     rgba(148,163,184,0.5);
+      --accent:    #6366f1;
+      --accent-lo: rgba(99,102,241,0.15);
+      --teal:      #2dd4bf;
+      --purple:    #a78bfa;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      cursor: default;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Canvas ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #radial-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(49,46,129,0.18) 0%, rgba(5,11,20,0.85) 60%, #050B14 100%);
+    }
+
+    /* ── Shell ── */
+    #shell {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      transition: opacity 1s ease;
+    }
+    #shell.ui-hidden { opacity: 0; pointer-events: none; }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+      letter-spacing: 0.2em;
+      color: #c7d2fe;
+      font-weight: 300;
+    }
+    .wordmark strong { font-weight: 600; color: #fff; }
+
+    .wordmark-sub {
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(165,180,252,0.45);
+      margin-top: 0.2rem;
+    }
+
+    .headphone-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(15,23,42,0.5);
+      backdrop-filter: blur(12px);
+      padding: 0.5rem 1rem;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+    .headphone-badge svg { color: var(--accent); animation: pulse 2s infinite; }
+
+    /* ── Main ── */
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: clamp(2rem, 5vh, 3.5rem);
+    }
+
+    /* Play Button */
+    .play-wrap {
+      position: relative;
+      cursor: pointer;
+    }
+    .play-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--accent);
+      filter: blur(40px);
+      opacity: 0.15;
+      transition: opacity 1s ease;
+    }
+    .play-wrap.active .play-glow { opacity: 0.4; animation: pulse 2s infinite; }
+
+    #play-btn {
+      position: relative;
+      width: clamp(6rem, 14vw, 8rem);
+      height: clamp(6rem, 14vw, 8rem);
+      border-radius: 50%;
+      background: rgba(15,23,42,0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.4s, background 0.4s, transform 0.15s;
+      outline: none;
+    }
+    #play-btn:hover { border-color: rgba(99,102,241,0.5); background: rgba(30,41,59,0.8); }
+    #play-btn:active { transform: scale(0.96); }
+    #play-btn svg { color: #a5b4fc; }
+
+    /* State info */
+    .state-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: #fff;
+      text-align: center;
+      transition: all 1s ease;
+    }
+    .state-sub {
+      font-size: 0.95rem;
+      color: rgba(199,210,254,0.5);
+      font-weight: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .state-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(99,102,241,0.5);
+    }
+
+    /* Brainwave buttons */
+    .wave-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+    .wave-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.9rem 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.4);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.4s ease;
+      width: 5.5rem;
+      outline: none;
+      color: inherit;
+      font-family: inherit;
+    }
+    .wave-btn:hover { background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.12); }
+    .wave-btn.active {
+      background: rgba(99,102,241,0.15);
+      border-color: rgba(99,102,241,0.45);
+      box-shadow: 0 0 20px rgba(99,102,241,0.18);
+    }
+    .wave-btn svg { width: 1.3rem; height: 1.3rem; color: #475569; transition: color 0.4s; }
+    .wave-btn.active svg { color: var(--accent); }
+    .wave-label { font-size: 0.7rem; font-weight: 500; color: #94a3b8; }
+    .wave-hz { font-size: 0.6rem; color: #475569; }
+
+    /* Icon colours per state */
+    .wave-btn[data-color="purple"].active svg { color: #a78bfa; }
+    .wave-btn[data-color="blue"].active svg   { color: #60a5fa; }
+    .wave-btn[data-color="teal"].active svg   { color: #2dd4bf; }
+    .wave-btn[data-color="indigo"].active svg { color: #818cf8; }
+    .wave-btn[data-color="slate"].active svg  { color: #94a3b8; }
+
+    /* ── Footer ── */
+    footer { width: 100%; max-width: 56rem; margin: 0 auto; }
+
+    .settings-toggle {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.75rem;
+    }
+    #settings-btn {
+      padding: 0.65rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.5);
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.3s;
+      outline: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #settings-btn:hover { color: #e2e8f0; }
+    #settings-btn.active {
+      background: rgba(99,102,241,0.25);
+      border-color: rgba(99,102,241,0.5);
+      color: #c7d2fe;
+    }
+
+    /* Settings Panel */
+    #settings-panel {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.5s ease;
+    }
+    #settings-panel.open {
+      max-height: 800px;
+      opacity: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .settings-inner {
+      background: rgba(15,23,42,0.65);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 1.75rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+    @media (max-width: 640px) { .settings-inner { grid-template-columns: 1fr; } }
+
+    .settings-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #818cf8;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Carrier grid */
+    .carrier-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .carrier-btn {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 0.65rem;
+      border: 1px solid transparent;
+      background: rgba(30,41,59,0.5);
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      outline: none;
+    }
+    .carrier-btn:hover { background: rgba(30,41,59,0.9); color: #94a3b8; }
+    .carrier-btn.active {
+      background: rgba(99,102,241,0.18);
+      border-color: rgba(99,102,241,0.4);
+      color: #c7d2fe;
+    }
+
+    .carrier-note {
+      font-size: 0.65rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+
+    /* Sliders */
+    .mixer-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .slider-row { display: flex; flex-direction: column; gap: 0.4rem; }
+    .slider-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+    .slider-meta label { display: flex; align-items: center; gap: 0.3rem; }
+    .slider-meta .val { font-variant-numeric: tabular-nums; color: #94a3b8; }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 3px;
+      border-radius: 99px;
+      background: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: currentColor;
+      border: 2px solid rgba(255,255,255,0.15);
+      transition: transform 0.15s;
+    }
+    input[type=range]:active::-webkit-slider-thumb { transform: scale(1.25); }
+    input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: currentColor;
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+
+    .slider-purple { color: #a78bfa; }
+    .slider-indigo { color: #818cf8; }
+    .slider-blue   { color: #60a5fa; }
+    .slider-teal   { color: #2dd4bf; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0.25rem 0;
+    }
+
+    /* Error */
+    #error-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+    #error-screen.visible { display: flex; }
+    #error-screen svg { color: #f59e0b; }
+    #error-screen h2 { font-size: 1.25rem; font-weight: 500; }
+    #error-screen p { color: #64748b; font-size: 0.875rem; max-width: 28rem; }
+
+    /* Utilities */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.5; }
+    }
+
+    /* SVG icons via inline helpers — keep crisp at all sizes */
+    svg { display: block; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- Error Screen -->
+<div id="error-screen" role="alert">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+  <h2>Audio Unavailable</h2>
+  <p id="error-msg">Web Audio API is not supported in this browser. Try Chrome, Firefox, or Safari.</p>
+</div>
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div id="radial-overlay" aria-hidden="true"></div>
+
+<div id="shell">
+
+  <header>
+    <div>
+      <div class="wordmark">NEURO<strong>SYNC</strong></div>
+      <div class="wordmark-sub">Psychoacoustic Entrainment</div>
+    </div>
+    <div class="headphone-badge">
+      <!-- headphones icon -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+      </svg>
+      <span class="hidden-sm">Stereo Headphones Required</span>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="play-wrap" id="play-wrap" role="button" tabindex="0" aria-label="Play" aria-pressed="false">
+      <div class="play-glow"></div>
+      <button id="play-btn" aria-label="Play" aria-pressed="false">
+        <!-- play icon -->
+        <svg id="icon-play" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <!-- pause icon (hidden initially) -->
+        <svg id="icon-pause" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
+      </button>
+    </div>
+
+    <div style="text-align:center">
+      <div class="state-title" id="state-title">Alpha State</div>
+      <div class="state-sub">
+        <span id="carrier-display">432Hz Carrier</span>
+        <span class="state-dot" aria-hidden="true"></span>
+        <span id="beat-display">8Hz Differential</span>
+      </div>
+    </div>
+
+    <div class="wave-grid" role="group" aria-label="Brainwave states" id="wave-grid">
+      <!-- Populated by JS -->
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="settings-toggle">
+      <button id="settings-btn" aria-label="Toggle settings" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="settings-panel" aria-hidden="true">
+      <div class="settings-inner">
+
+        <!-- Carrier Column -->
+        <div>
+          <div class="settings-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Solfeggio Carrier
+          </div>
+          <div class="carrier-grid" role="group" aria-label="Carrier frequency" id="carrier-grid">
+            <!-- Populated by JS -->
+          </div>
+          <p class="carrier-note">The carrier frequency sets the tonal center. Lower values feel warmer and less fatiguing over long sessions.</p>
+        </div>
+
+        <!-- Mixer Column -->
+        <div class="mixer-col">
+          <div class="settings-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            Acoustic Mixer
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-meta">
+              <label for="s-beat">Binaural Differential</label>
+              <span class="val" id="v-beat">30%</span>
+            </div>
+            <input type="range" id="s-beat" min="0" max="1" step="0.01" value="0.3" class="slider-purple" aria-valuetext="30%">
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-meta">
+              <label for="s-noise">Brown Noise Mask</label>
+              <span class="val" id="v-noise">0%</span>
+            </div>
+            <input type="range" id="s-noise" min="0" max="1" step="0.01" value="0" class="slider-indigo" aria-valuetext="0%">
+          </div>
+
+          <hr class="divider">
+
+          <div class="slider-row">
+            <div class="slider-meta">
+              <label for="s-stereo">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                Stereo Width
+              </label>
+              <span class="val" id="v-stereo">100%</span>
+            </div>
+            <input type="range" id="s-stereo" min="0" max="1" step="0.01" value="1" class="slider-blue" aria-valuetext="100%">
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-meta">
+              <label for="s-reverb">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h20"/><path d="M2 6c5.333 4 10.667 4 16 0"/><path d="M2 18c5.333-4 10.667-4 16 0"/></svg>
+                Hall Reverb
+              </label>
+              <span class="val" id="v-reverb">20%</span>
+            </div>
+            <input type="range" id="s-reverb" min="0" max="1" step="0.01" value="0.2" class="slider-teal" aria-valuetext="20%">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────
+const SOLFEGGIO_FREQS = [
+  { label: '174 Hz', value: 174 },
+  { label: '396 Hz', value: 396 },
+  { label: '432 Hz', value: 432 },
+  { label: '528 Hz', value: 528 },
+];
+
+const BRAINWAVE_STATES = [
+  { label: 'Gamma', sub: 'Peak Focus', value: 30, color: 'purple', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>` },
+  { label: 'Beta',  sub: 'Alertness',  value: 14, color: 'blue',   icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04z"/></svg>` },
+  { label: 'Alpha', sub: 'Relaxation', value: 8,  color: 'teal',   icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>` },
+  { label: 'Theta', sub: 'Deep Med.',  value: 4,  color: 'indigo', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>` },
+  { label: 'Delta', sub: 'Restore',    value: 1.5,color: 'slate',  icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>` },
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let playing     = false;
+let carrier     = 432;
+let beatTarget  = 8;
+let beatVol     = 0.3;
+let noiseVol    = 0;
+let stereoWidth = 1.0;
+let reverbLevel = 0.2;
+let uiVisible   = true;
+let settingsOpen = false;
+let engine      = null;
+
+// ─────────────────────────────────────────────
+//  AUDIO ENGINE
+// ─────────────────────────────────────────────
+class BinauralEngine {
+  constructor() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) throw new Error('Web Audio API not supported');
+    this.ctx = new Ctx();
+    this.active = false;
+    this.currentCarrier = 432;
+    this.currentBeat = 8;
+    this.oscillators = [];
+    this.panners = [];
+    this._stopTimeoutId = null;
+    this.noiseSource = null;
+
+    // Master bus
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.value = 0.0001;
+    this.masterGain.connect(this.ctx.destination);
+
+    this.preMasterBus = this.ctx.createGain();
+    this.preMasterBus.connect(this.masterGain);
+
+    // Reverb
+    this.convolver = this.ctx.createConvolver();
+    this._generateImpulseResponse();
+    this.reverbGain = this.ctx.createGain();
+    this.reverbGain.gain.value = 0.0001;
+    this.preMasterBus.connect(this.convolver);
+    this.convolver.connect(this.reverbGain);
+    this.reverbGain.connect(this.masterGain);
+
+    // Noise
+    this.noiseGain = this.ctx.createGain();
+    this.noiseGain.gain.value = 0.0001;
+    this.noiseGain.connect(this.preMasterBus);
+
+    // Beat mix / LPF
+    this.beatMixGain = this.ctx.createGain();
+    this.beatMixGain.gain.value = 0.25;
+    this.beatMixGain.connect(this.preMasterBus);
+
+    this.lpf = this.ctx.createBiquadFilter();
+    this.lpf.type = 'lowpass';
+    this.lpf.frequency.value = 800;
+    this.lpf.connect(this.beatMixGain);
+
+    this._initBrownNoise();
+  }
+
+  _generateImpulseResponse() {
+    const rate = this.ctx.sampleRate;
+    const len  = rate * 3;
+    const buf  = this.ctx.createBuffer(2, len, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (rate * 0.5));
+    }
+    this.convolver.buffer = buf;
+  }
+
+  _initBrownNoise() {
+    const len = this.ctx.sampleRate * 5;
+    const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const out = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      out[i] = (last + 0.02 * w) / 1.02;
+      last = out[i];
+      out[i] *= 3.5;
+    }
+    // Fade tail to avoid loop click
+    const fade = Math.floor(this.ctx.sampleRate * 0.01);
+    for (let i = 0; i < fade; i++) out[len - 1 - i] *= i / fade;
+    this.noiseBuffer = buf;
+  }
+
+  _createOscPair(carrierMult, type, volume) {
+    const oscL = this.ctx.createOscillator();
+    const oscR = this.ctx.createOscillator();
+    oscL.type = oscR.type = type;
+
+    const gainL = this.ctx.createGain();
+    const gainR = this.ctx.createGain();
+    gainL.gain.value = gainR.gain.value = volume;
+
+    const panL = this.ctx.createStereoPanner?.() ?? null;
+    const panR = this.ctx.createStereoPanner?.() ?? null;
+
+    oscL.connect(gainL);
+    oscR.connect(gainR);
+
+    if (panL && panR) {
+      panL.pan.value = -1; panR.pan.value = 1;
+      gainL.connect(panL); panL.connect(this.lpf);
+      gainR.connect(panR); panR.connect(this.lpf);
+      this.panners.push({ l: panL, r: panR });
+    } else {
+      gainL.connect(this.lpf);
+      gainR.connect(this.lpf);
+    }
+
+    this.oscillators.push({ oscL, oscR, mult: carrierMult });
+  }
+
+  start(initials) {
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+
+    // Cancel any pending cleanup from a recent stop()
+    if (this._stopTimeoutId !== null) {
+      clearTimeout(this._stopTimeoutId);
+      this._stopTimeoutId = null;
+      this._cleanupNodes();
+    }
+    if (this.active) return;
+
+    this._createOscPair(1,   'sine',     0.8);
+    this._createOscPair(1,   'triangle', 0.15);
+    this._createOscPair(1.5, 'sine',     0.4);
+    this._createOscPair(1.5, 'triangle', 0.08);
+    this._applyFrequencies(this.currentCarrier, this.currentBeat, 0);
+
+    this.oscillators.forEach(({ oscL, oscR }) => { oscL.start(); oscR.start(); });
+
+    this.noiseSource = this.ctx.createBufferSource();
+    this.noiseSource.buffer = this.noiseBuffer;
+    this.noiseSource.loop = true;
+    this.noiseSource.connect(this.noiseGain);
+    this.noiseSource.start();
+
+    if (initials) {
+      this.setVolumes(initials.beatVol, initials.noiseVol, 0);
+      this.setStereoWidth(initials.stereoWidth, 0);
+      this.setReverb(initials.reverbLevel, 0);
+    }
+
+    this.masterGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.5);
+    this.active = true;
+  }
+
+  stop() {
+    if (!this.active) return;
+    this.active = false;
+    this.masterGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.5);
+    this._stopTimeoutId = setTimeout(() => {
+      this._stopTimeoutId = null;
+      this._cleanupNodes();
+      this.ctx.suspend();
+    }, 1500);
+  }
+
+  _cleanupNodes() {
+    this.oscillators.forEach(({ oscL, oscR }) => {
+      try { oscL.stop(); } catch (_) {}
+      try { oscR.stop(); } catch (_) {}
+      oscL.disconnect(); oscR.disconnect();
+    });
+    if (this.noiseSource) {
+      try { this.noiseSource.stop(); } catch (_) {}
+      this.noiseSource.disconnect();
+      this.noiseSource = null;
+    }
+    this.oscillators = [];
+    this.panners = [];
+  }
+
+  destroy() {
+    this.stop();
+    setTimeout(() => this.ctx.close(), 1600);
+  }
+
+  setFrequencies(carrier, beat, secs = 10) {
+    this.currentCarrier = carrier;
+    this.currentBeat = beat;
+    if (this.active) this._applyFrequencies(carrier, beat, secs);
+  }
+
+  _applyFrequencies(carrier, beat, secs) {
+    const t = this.ctx.currentTime + secs;
+    this.oscillators.forEach(({ oscL, oscR, mult }) => {
+      const base = carrier * mult;
+      const fL = Math.max(1, base - beat / 2);
+      const fR = Math.max(1, base + beat / 2);
+      if (secs > 0) {
+        oscL.frequency.exponentialRampToValueAtTime(fL, t);
+        oscR.frequency.exponentialRampToValueAtTime(fR, t);
+      } else {
+        oscL.frequency.setValueAtTime(fL, this.ctx.currentTime);
+        oscR.frequency.setValueAtTime(fR, this.ctx.currentTime);
+      }
+    });
+  }
+
+  setVolumes(bv, nv, time = 0.1) {
+    this.beatMixGain.gain.setTargetAtTime(Math.max(bv, 0.0001), this.ctx.currentTime, time);
+    this.noiseGain.gain.setTargetAtTime(Math.max(nv, 0.0001), this.ctx.currentTime, time);
+  }
+
+  setStereoWidth(w, time = 0.1) {
+    this.panners.forEach(({ l, r }) => {
+      l.pan.setTargetAtTime(-w, this.ctx.currentTime, time);
+      r.pan.setTargetAtTime( w, this.ctx.currentTime, time);
+    });
+  }
+
+  setReverb(lv, time = 0.1) {
+    this.reverbGain.gain.setTargetAtTime(Math.max(lv, 0.0001), this.ctx.currentTime, time);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CANVAS / PARTICLES
+// ─────────────────────────────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx2d  = canvas.getContext('2d');
+let animId;
+let time2 = 0;
+let visualBeat = 8;
+
+const particles = Array.from({ length: 60 }, () => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  size:      Math.random() * 3 + 1,
+  speedY:    Math.random() * 0.5 + 0.1,
+  phase:     Math.random() * Math.PI * 2,
+  baseAlpha: Math.random() * 0.3 + 0.1,
+}));
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function renderFrame() {
+  visualBeat += (beatTarget - visualBeat) * 0.02;
+  const w = canvas.width, h = canvas.height;
+  ctx2d.fillStyle = '#050B14';
+  ctx2d.fillRect(0, 0, w, h);
+  time2 += 0.016;
+
+  particles.forEach(p => {
+    const speedMult = Math.max(0.2, visualBeat / 10);
+    p.y -= p.speedY * speedMult;
+    if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+
+    const pulse = Math.sin(time2 * visualBeat * Math.PI * 2 + p.phase);
+    const alpha = playing
+      ? Math.max(0.05, p.baseAlpha + pulse * 0.2)
+      : p.baseAlpha * 0.5;
+    const hue = 220 + visualBeat * 2;
+
+    ctx2d.beginPath();
+    ctx2d.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx2d.fillStyle = `hsla(${hue},60%,70%,${alpha})`;
+    ctx2d.fill();
+
+    if (playing && pulse > 0.5) {
+      ctx2d.shadowBlur  = 15;
+      ctx2d.shadowColor = `hsla(${hue},70%,60%,${alpha})`;
+      ctx2d.fill();
+      ctx2d.shadowBlur = 0;
+    }
+  });
+
+  animId = requestAnimationFrame(renderFrame);
+}
+renderFrame();
+
+// ─────────────────────────────────────────────
+//  BUILD DOM
+// ─────────────────────────────────────────────
+// Carrier buttons
+const carrierGrid = document.getElementById('carrier-grid');
+SOLFEGGIO_FREQS.forEach(f => {
+  const btn = document.createElement('button');
+  btn.className = 'carrier-btn' + (f.value === carrier ? ' active' : '');
+  btn.textContent = f.label;
+  btn.setAttribute('aria-pressed', f.value === carrier);
+  btn.addEventListener('click', () => setCarrier(f.value));
+  carrierGrid.appendChild(btn);
+});
+
+// Brainwave buttons
+const waveGrid = document.getElementById('wave-grid');
+BRAINWAVE_STATES.forEach(w => {
+  const btn = document.createElement('button');
+  btn.className = 'wave-btn' + (w.value === beatTarget ? ' active' : '');
+  btn.dataset.color = w.color;
+  btn.setAttribute('aria-pressed', w.value === beatTarget);
+  btn.innerHTML = `
+    ${w.icon}
+    <span class="wave-label">${w.label}</span>
+    <span class="wave-hz">${w.value} Hz</span>
+  `;
+  btn.addEventListener('click', () => setBeatTarget(w.value));
+  waveGrid.appendChild(btn);
+});
+
+// ─────────────────────────────────────────────
+//  ACTIONS
+// ─────────────────────────────────────────────
+function togglePlay() {
+  if (!engine) return;
+  if (playing) {
+    engine.stop();
+    playing = false;
+  } else {
+    engine.currentCarrier = carrier;
+    engine.currentBeat    = beatTarget;
+    engine.start({ beatVol, noiseVol, stereoWidth, reverbLevel });
+    playing = true;
+  }
+  updatePlayUI();
+}
+
+function setCarrier(val) {
+  carrier = val;
+  document.getElementById('carrier-display').textContent = `${val}Hz Carrier`;
+  document.querySelectorAll('.carrier-btn').forEach((b, i) => {
+    const active = SOLFEGGIO_FREQS[i].value === val;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', active);
+  });
+  if (engine && playing) engine.setFrequencies(carrier, beatTarget, 10);
+}
+
+function setBeatTarget(val) {
+  beatTarget = val;
+  const state = BRAINWAVE_STATES.find(b => b.value === val);
+  document.getElementById('state-title').textContent =
+    (state ? state.label : 'Custom') + ' State';
+  document.getElementById('beat-display').textContent = `${val}Hz Differential`;
+
+  document.querySelectorAll('.wave-btn').forEach((b, i) => {
+    const active = BRAINWAVE_STATES[i].value === val;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', active);
+  });
+  if (engine && playing) engine.setFrequencies(carrier, beatTarget, 10);
+}
+
+function updatePlayUI() {
+  const wrap = document.getElementById('play-wrap');
+  const btn  = document.getElementById('play-btn');
+  document.getElementById('icon-play').style.display  = playing ? 'none'  : '';
+  document.getElementById('icon-pause').style.display = playing ? ''      : 'none';
+  wrap.classList.toggle('active', playing);
+  wrap.setAttribute('aria-pressed', playing);
+  btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+}
+
+// ─────────────────────────────────────────────
+//  SETTINGS PANEL
+// ─────────────────────────────────────────────
+document.getElementById('settings-btn').addEventListener('click', () => {
+  settingsOpen = !settingsOpen;
+  const panel = document.getElementById('settings-panel');
+  const sbtn  = document.getElementById('settings-btn');
+  panel.classList.toggle('open', settingsOpen);
+  panel.setAttribute('aria-hidden', !settingsOpen);
+  sbtn.classList.toggle('active', settingsOpen);
+  sbtn.setAttribute('aria-expanded', settingsOpen);
+});
+
+// Sliders
+function bindSlider(id, valId, getter, setter, digits = 0) {
+  const input = document.getElementById(id);
+  const display = document.getElementById(valId);
+  const update = () => {
+    const v = parseFloat(input.value);
+    setter(v);
+    const pct = Math.round(v * 100) + '%';
+    display.textContent = pct;
+    input.setAttribute('aria-valuetext', pct);
+    if (engine && playing) syncMixer();
+  };
+  input.addEventListener('input', update);
+}
+
+function syncMixer() {
+  engine.setVolumes(beatVol, noiseVol);
+  engine.setStereoWidth(stereoWidth);
+  engine.setReverb(reverbLevel);
+}
+
+bindSlider('s-beat',   'v-beat',   () => beatVol,     v => beatVol = v);
+bindSlider('s-noise',  'v-noise',  () => noiseVol,    v => noiseVol = v);
+bindSlider('s-stereo', 'v-stereo', () => stereoWidth, v => stereoWidth = v);
+bindSlider('s-reverb', 'v-reverb', () => reverbLevel, v => reverbLevel = v);
+
+// ─────────────────────────────────────────────
+//  PLAY BUTTON
+// ─────────────────────────────────────────────
+document.getElementById('play-wrap').addEventListener('click', togglePlay);
+document.getElementById('play-wrap').addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); togglePlay(); }
+});
+
+// ─────────────────────────────────────────────
+//  UI FADE (hides controls while playing)
+// ─────────────────────────────────────────────
+let uiTimeout;
+function wakeUI() {
+  uiVisible = true;
+  document.getElementById('shell').classList.remove('ui-hidden');
+  clearTimeout(uiTimeout);
+  uiTimeout = setTimeout(() => {
+    if (playing && !settingsOpen) {
+      uiVisible = false;
+      document.getElementById('shell').classList.add('ui-hidden');
+    }
+  }, 4000);
+}
+window.addEventListener('mousemove', wakeUI);
+window.addEventListener('touchstart', wakeUI);
+window.addEventListener('keydown', wakeUI);
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+try {
+  engine = new BinauralEngine();
+} catch (err) {
+  document.getElementById('error-msg').textContent = err.message;
+  document.getElementById('error-screen').classList.add('visible');
+}
+
+window.addEventListener('beforeunload', () => engine?.destroy());
+</script>
+</body>
+</html>
