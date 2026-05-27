@@ -33,7 +33,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Canvas ── */
     #bg-canvas {
       position: fixed;
       inset: 0;
@@ -49,7 +48,6 @@
       background: radial-gradient(ellipse at center, rgba(49,46,129,0.18) 0%, rgba(5,11,20,0.85) 60%, #050B14 100%);
     }
 
-    /* ── Shell ── */
     #shell {
       position: relative;
       z-index: 10;
@@ -63,7 +61,6 @@
     }
     #shell.ui-hidden { opacity: 0; pointer-events: none; }
 
-    /* ── Header ── */
     header {
       display: flex;
       justify-content: space-between;
@@ -102,7 +99,6 @@
     }
     .headphone-badge svg { color: var(--accent); animation: pulse 2s infinite; }
 
-    /* ── Main ── */
     main {
       display: flex;
       flex-direction: column;
@@ -112,7 +108,6 @@
       gap: clamp(2rem, 5vh, 3.5rem);
     }
 
-    /* Play Button */
     .play-wrap {
       position: relative;
       cursor: pointer;
@@ -124,9 +119,14 @@
       background: var(--accent);
       filter: blur(40px);
       opacity: 0.15;
-      transition: opacity 1s ease;
+      transition: opacity 1s ease, background 2s ease;
     }
-    .play-wrap.active .play-glow { opacity: 0.4; animation: pulse 2s infinite; }
+    .play-wrap.active .play-glow     { opacity: 0.4; animation: pulse 2s infinite; }
+    .play-wrap.winding-down .play-glow {
+      background: #7dd3fc;
+      opacity: 0.3;
+      animation: breathe-glow 6s ease-in-out infinite;
+    }
 
     #play-btn {
       position: relative;
@@ -147,7 +147,6 @@
     #play-btn:active { transform: scale(0.96); }
     #play-btn svg { color: #a5b4fc; }
 
-    /* State info */
     .state-title {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(2.5rem, 7vw, 4.5rem);
@@ -173,7 +172,6 @@
       background: rgba(99,102,241,0.5);
     }
 
-    /* Brainwave buttons */
     .wave-grid {
       display: flex;
       flex-wrap: wrap;
@@ -206,9 +204,8 @@
     .wave-btn svg { width: 1.3rem; height: 1.3rem; color: #475569; transition: color 0.4s; }
     .wave-btn.active svg { color: var(--accent); }
     .wave-label { font-size: 0.7rem; font-weight: 500; color: #94a3b8; }
-    .wave-hz { font-size: 0.6rem; color: #475569; }
+    .wave-hz    { font-size: 0.6rem; color: #475569; }
 
-    /* Icon colours per state */
     .wave-btn[data-color="purple"].active svg { color: #a78bfa; }
     .wave-btn[data-color="blue"].active svg   { color: #60a5fa; }
     .wave-btn[data-color="teal"].active svg   { color: #2dd4bf; }
@@ -217,6 +214,62 @@
 
     /* ── Footer ── */
     footer { width: 100%; max-width: 56rem; margin: 0 auto; }
+
+    /* ── Timer Bar ── */
+    .timer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      margin-bottom: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .timer-label-text {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(148,163,184,0.32);
+      flex-shrink: 0;
+    }
+    .timer-btns { display: flex; gap: 0.35rem; }
+    .timer-btn {
+      padding: 0.38rem 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.4);
+      color: #4b5563;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      outline: none;
+      letter-spacing: 0.02em;
+    }
+    .timer-btn:hover { color: #94a3b8; border-color: rgba(255,255,255,0.1); }
+    .timer-btn.active {
+      background: rgba(99,102,241,0.15);
+      border-color: rgba(99,102,241,0.4);
+      color: #a5b4fc;
+    }
+    #timer-countdown {
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      color: #6366f1;
+      min-width: 3.5rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s, color 1s;
+      pointer-events: none;
+    }
+    #timer-countdown.visible { opacity: 1; }
+    #timer-countdown.winding {
+      color: #7dd3fc;
+      animation: breathe-text 6s ease-in-out infinite;
+    }
 
     .settings-toggle {
       display: flex;
@@ -242,7 +295,6 @@
       color: #c7d2fe;
     }
 
-    /* Settings Panel */
     #settings-panel {
       overflow: hidden;
       max-height: 0;
@@ -279,7 +331,7 @@
       gap: 0.4rem;
     }
 
-    /* Carrier grid */
+    /* 5 carrier buttons in 2-col grid; 5th auto-spans full width */
     .carrier-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -297,6 +349,7 @@
       transition: all 0.3s;
       font-family: inherit;
       outline: none;
+      text-align: center;
     }
     .carrier-btn:hover { background: rgba(30,41,59,0.9); color: #94a3b8; }
     .carrier-btn.active {
@@ -304,6 +357,8 @@
       border-color: rgba(99,102,241,0.4);
       color: #c7d2fe;
     }
+    /* Span the lone last button across both columns */
+    .carrier-btn:last-child:nth-child(odd) { grid-column: span 2; }
 
     .carrier-note {
       font-size: 0.65rem;
@@ -311,9 +366,7 @@
       line-height: 1.5;
     }
 
-    /* Sliders */
     .mixer-col { display: flex; flex-direction: column; gap: 1.25rem; }
-
     .slider-row { display: flex; flex-direction: column; gap: 0.4rem; }
     .slider-meta {
       display: flex;
@@ -361,7 +414,6 @@
       margin: 0.25rem 0;
     }
 
-    /* Error */
     #error-screen {
       display: none;
       position: fixed;
@@ -378,24 +430,31 @@
     #error-screen.visible { display: flex; }
     #error-screen svg { color: #f59e0b; }
     #error-screen h2 { font-size: 1.25rem; font-weight: 500; }
-    #error-screen p { color: #64748b; font-size: 0.875rem; max-width: 28rem; }
+    #error-screen p  { color: #64748b; font-size: 0.875rem; max-width: 28rem; }
 
-    /* Utilities */
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.5; }
     }
+    @keyframes breathe-glow {
+      0%, 100% { opacity: 0.2; transform: scale(1);    }
+      50%       { opacity: 0.5; transform: scale(1.1);  }
+    }
+    @keyframes breathe-text {
+      0%, 100% { opacity: 0.55; }
+      50%       { opacity: 1;   }
+    }
 
-    /* SVG icons via inline helpers — keep crisp at all sizes */
     svg { display: block; flex-shrink: 0; }
   </style>
 </head>
 <body>
 
-<!-- Error Screen -->
 <div id="error-screen" role="alert">
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
   </svg>
   <h2>Audio Unavailable</h2>
   <p id="error-msg">Web Audio API is not supported in this browser. Try Chrome, Firefox, or Safari.</p>
@@ -412,11 +471,12 @@
       <div class="wordmark-sub">Psychoacoustic Entrainment</div>
     </div>
     <div class="headphone-badge">
-      <!-- headphones icon -->
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+        <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
       </svg>
-      <span class="hidden-sm">Stereo Headphones Required</span>
+      <span>Stereo Headphones Required</span>
     </div>
   </header>
 
@@ -425,17 +485,20 @@
     <div class="play-wrap" id="play-wrap" role="button" tabindex="0" aria-label="Play" aria-pressed="false">
       <div class="play-glow"></div>
       <button id="play-btn" aria-label="Play" aria-pressed="false">
-        <!-- play icon -->
-        <svg id="icon-play" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        <!-- pause icon (hidden initially) -->
-        <svg id="icon-pause" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
+        <svg id="icon-play" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <svg id="icon-pause" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <line x1="6" y1="4" x2="6" y2="20"/>
+          <line x1="18" y1="4" x2="18" y2="20"/>
+        </svg>
       </button>
     </div>
 
     <div style="text-align:center">
       <div class="state-title" id="state-title">Alpha State</div>
       <div class="state-sub">
-        <span id="carrier-display">432Hz Carrier</span>
+        <span id="carrier-display">174Hz Carrier</span>
         <span class="state-dot" aria-hidden="true"></span>
         <span id="beat-display">8Hz Differential</span>
       </div>
@@ -448,10 +511,24 @@
   </main>
 
   <footer>
+
+    <!-- ── Timer Bar ── -->
+    <div class="timer-bar">
+      <span class="timer-label-text">Session</span>
+      <div class="timer-btns" role="group" aria-label="Session timer">
+        <button class="timer-btn active" data-mins="0"  aria-pressed="true">Off</button>
+        <button class="timer-btn"        data-mins="5"  aria-pressed="false">5 min</button>
+        <button class="timer-btn"        data-mins="10" aria-pressed="false">10 min</button>
+        <button class="timer-btn"        data-mins="15" aria-pressed="false">15 min</button>
+      </div>
+      <span id="timer-countdown" aria-live="polite"></span>
+    </div>
+
     <div class="settings-toggle">
       <button id="settings-btn" aria-label="Toggle settings" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
     </div>
@@ -462,7 +539,9 @@
         <!-- Carrier Column -->
         <div>
           <div class="settings-label">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
             Solfeggio Carrier
           </div>
           <div class="carrier-grid" role="group" aria-label="Carrier frequency" id="carrier-grid">
@@ -474,7 +553,11 @@
         <!-- Mixer Column -->
         <div class="mixer-col">
           <div class="settings-label">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
             Acoustic Mixer
           </div>
 
@@ -499,7 +582,12 @@
           <div class="slider-row">
             <div class="slider-meta">
               <label for="s-stereo">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="15 3 21 3 21 9"/>
+                  <polyline points="9 21 3 21 3 15"/>
+                  <line x1="21" y1="3" x2="14" y2="10"/>
+                  <line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
                 Stereo Width
               </label>
               <span class="val" id="v-stereo">100%</span>
@@ -510,7 +598,11 @@
           <div class="slider-row">
             <div class="slider-meta">
               <label for="s-reverb">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h20"/><path d="M2 6c5.333 4 10.667 4 16 0"/><path d="M2 18c5.333-4 10.667-4 16 0"/></svg>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12h20"/>
+                  <path d="M2 6c5.333 4 10.667 4 16 0"/>
+                  <path d="M2 18c5.333-4 10.667-4 16 0"/>
+                </svg>
                 Hall Reverb
               </label>
               <span class="val" id="v-reverb">20%</span>
@@ -528,7 +620,10 @@
 // ─────────────────────────────────────────────
 //  DATA
 // ─────────────────────────────────────────────
+
+// 111 Hz added as a sub-bass healing carrier option
 const SOLFEGGIO_FREQS = [
+  { label: '111 Hz', value: 111 },
   { label: '174 Hz', value: 174 },
   { label: '396 Hz', value: 396 },
   { label: '432 Hz', value: 432 },
@@ -536,26 +631,33 @@ const SOLFEGGIO_FREQS = [
 ];
 
 const BRAINWAVE_STATES = [
-  { label: 'Gamma', sub: 'Peak Focus', value: 30, color: 'purple', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>` },
-  { label: 'Beta',  sub: 'Alertness',  value: 14, color: 'blue',   icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04z"/></svg>` },
-  { label: 'Alpha', sub: 'Relaxation', value: 8,  color: 'teal',   icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>` },
-  { label: 'Theta', sub: 'Deep Med.',  value: 4,  color: 'indigo', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>` },
-  { label: 'Delta', sub: 'Restore',    value: 1.5,color: 'slate',  icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>` },
+  { label: 'Gamma', sub: 'Peak Focus', value: 30,  color: 'purple', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>` },
+  { label: 'Beta',  sub: 'Alertness',  value: 14,  color: 'blue',   icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04z"/></svg>` },
+  { label: 'Alpha', sub: 'Relaxation', value: 8,   color: 'teal',   icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>` },
+  { label: 'Theta', sub: 'Deep Med.',  value: 4,   color: 'indigo', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>` },
+  { label: 'Delta', sub: 'Restore',    value: 1.5, color: 'slate',  icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>` },
 ];
 
 // ─────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────
-let playing     = false;
-let carrier     = 432;
-let beatTarget  = 8;
-let beatVol     = 0.3;
-let noiseVol    = 0;
-let stereoWidth = 1.0;
-let reverbLevel = 0.2;
-let uiVisible   = true;
+let playing      = false;
+let carrier      = 174;    // ← DEFAULT changed to 174 Hz
+let beatTarget   = 8;
+let beatVol      = 0.3;
+let noiseVol     = 0;
+let stereoWidth  = 1.0;
+let reverbLevel  = 0.2;
+let uiVisible    = true;
 let settingsOpen = false;
-let engine      = null;
+let engine       = null;
+
+// Timer
+const WIND_DOWN_SECS = 28;   // seconds of breathing pulses + fade before silence
+let timerDuration   = 0;     // 0 = off, else total seconds selected
+let timerRemaining  = 0;
+let timerIntervalId = null;
+let isWindingDown   = false;
 
 // ─────────────────────────────────────────────
 //  AUDIO ENGINE
@@ -565,13 +667,14 @@ class BinauralEngine {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) throw new Error('Web Audio API not supported');
     this.ctx = new Ctx();
-    this.active = false;
-    this.currentCarrier = 432;
-    this.currentBeat = 8;
-    this.oscillators = [];
-    this.panners = [];
-    this._stopTimeoutId = null;
-    this.noiseSource = null;
+    this.active         = false;
+    this.currentCarrier = 174;
+    this.currentBeat    = 8;
+    this.oscillators    = [];
+    this.panners        = [];
+    this._stopTimeoutId     = null;
+    this._windDownTimeoutId = null;
+    this.noiseSource    = null;
 
     // Master bus
     this.masterGain = this.ctx.createGain();
@@ -614,7 +717,8 @@ class BinauralEngine {
     const buf  = this.ctx.createBuffer(2, len, rate);
     for (let ch = 0; ch < 2; ch++) {
       const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (rate * 0.5));
+      for (let i = 0; i < len; i++)
+        d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (rate * 0.5));
     }
     this.convolver.buffer = buf;
   }
@@ -623,14 +727,13 @@ class BinauralEngine {
     const len = this.ctx.sampleRate * 5;
     const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
     const out = buf.getChannelData(0);
-    let last = 0;
+    let last  = 0;
     for (let i = 0; i < len; i++) {
       const w = Math.random() * 2 - 1;
-      out[i] = (last + 0.02 * w) / 1.02;
-      last = out[i];
+      out[i]  = (last + 0.02 * w) / 1.02;
+      last    = out[i];
       out[i] *= 3.5;
     }
-    // Fade tail to avoid loop click
     const fade = Math.floor(this.ctx.sampleRate * 0.01);
     for (let i = 0; i < fade; i++) out[len - 1 - i] *= i / fade;
     this.noiseBuffer = buf;
@@ -639,7 +742,7 @@ class BinauralEngine {
   _createOscPair(carrierMult, type, volume) {
     const oscL = this.ctx.createOscillator();
     const oscR = this.ctx.createOscillator();
-    oscL.type = oscR.type = type;
+    oscL.type  = oscR.type = type;
 
     const gainL = this.ctx.createGain();
     const gainR = this.ctx.createGain();
@@ -667,11 +770,16 @@ class BinauralEngine {
   start(initials) {
     if (this.ctx.state === 'suspended') this.ctx.resume();
 
-    // Cancel any pending cleanup from a recent stop()
+    // Cancel any pending stop cleanup
     if (this._stopTimeoutId !== null) {
       clearTimeout(this._stopTimeoutId);
       this._stopTimeoutId = null;
       this._cleanupNodes();
+    }
+    // Cancel any pending wind-down cleanup
+    if (this._windDownTimeoutId !== null) {
+      clearTimeout(this._windDownTimeoutId);
+      this._windDownTimeoutId = null;
     }
     if (this.active) return;
 
@@ -685,7 +793,7 @@ class BinauralEngine {
 
     this.noiseSource = this.ctx.createBufferSource();
     this.noiseSource.buffer = this.noiseBuffer;
-    this.noiseSource.loop = true;
+    this.noiseSource.loop   = true;
     this.noiseSource.connect(this.noiseGain);
     this.noiseSource.start();
 
@@ -695,6 +803,7 @@ class BinauralEngine {
       this.setReverb(initials.reverbLevel, 0);
     }
 
+    this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
     this.masterGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.5);
     this.active = true;
   }
@@ -702,12 +811,60 @@ class BinauralEngine {
   stop() {
     if (!this.active) return;
     this.active = false;
+
+    if (this._windDownTimeoutId !== null) {
+      clearTimeout(this._windDownTimeoutId);
+      this._windDownTimeoutId = null;
+    }
+
+    this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
     this.masterGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.5);
+
     this._stopTimeoutId = setTimeout(() => {
       this._stopTimeoutId = null;
       this._cleanupNodes();
       this.ctx.suspend();
     }, 1500);
+  }
+
+  // Called automatically WIND_DOWN_SECS before the session ends.
+  // Schedules 3 slow "breath" pulses (swell → ebb) then a smooth fade to silence.
+  windDown(totalSecs = WIND_DOWN_SECS) {
+    if (!this.active) return;
+
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const g   = this.masterGain.gain;
+
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(1.0, now);
+
+    // Phase 1 — three slow breaths (6 s each = 18 s total)
+    // Each cycle: volume swells to a soft peak, then settles lower
+    const breathDur  = 6;
+    const numBreaths = 3;
+
+    for (let i = 0; i < numBreaths; i++) {
+      const t = now + i * breathDur;
+      g.linearRampToValueAtTime(0.92, t + breathDur * 0.38);  // inhale
+      g.linearRampToValueAtTime(0.45, t + breathDur);          // exhale
+    }
+
+    // Phase 2 — gentle fade to silence over the remaining ~10 s
+    const fadeStart = now + breathDur * numBreaths;
+    const fadeDur   = totalSecs - breathDur * numBreaths;
+    g.setValueAtTime(0.45, fadeStart);
+    g.linearRampToValueAtTime(0.0001, fadeStart + fadeDur);
+
+    // Audio node cleanup fires after the envelope finishes
+    this._windDownTimeoutId = setTimeout(() => {
+      this._windDownTimeoutId = null;
+      if (this.active) {
+        this.active = false;
+        this._cleanupNodes();
+        ctx.suspend();
+      }
+    }, (totalSecs + 1.5) * 1000);
   }
 
   _cleanupNodes() {
@@ -722,7 +879,7 @@ class BinauralEngine {
       this.noiseSource = null;
     }
     this.oscillators = [];
-    this.panners = [];
+    this.panners     = [];
   }
 
   destroy() {
@@ -732,7 +889,7 @@ class BinauralEngine {
 
   setFrequencies(carrier, beat, secs = 10) {
     this.currentCarrier = carrier;
-    this.currentBeat = beat;
+    this.currentBeat    = beat;
     if (this.active) this._applyFrequencies(carrier, beat, secs);
   }
 
@@ -740,8 +897,8 @@ class BinauralEngine {
     const t = this.ctx.currentTime + secs;
     this.oscillators.forEach(({ oscL, oscR, mult }) => {
       const base = carrier * mult;
-      const fL = Math.max(1, base - beat / 2);
-      const fR = Math.max(1, base + beat / 2);
+      const fL   = Math.max(1, base - beat / 2);
+      const fR   = Math.max(1, base + beat / 2);
       if (secs > 0) {
         oscL.frequency.exponentialRampToValueAtTime(fL, t);
         oscR.frequency.exponentialRampToValueAtTime(fR, t);
@@ -754,7 +911,7 @@ class BinauralEngine {
 
   setVolumes(bv, nv, time = 0.1) {
     this.beatMixGain.gain.setTargetAtTime(Math.max(bv, 0.0001), this.ctx.currentTime, time);
-    this.noiseGain.gain.setTargetAtTime(Math.max(nv, 0.0001), this.ctx.currentTime, time);
+    this.noiseGain.gain.setTargetAtTime(Math.max(nv, 0.0001),  this.ctx.currentTime, time);
   }
 
   setStereoWidth(w, time = 0.1) {
@@ -774,13 +931,12 @@ class BinauralEngine {
 // ─────────────────────────────────────────────
 const canvas = document.getElementById('bg-canvas');
 const ctx2d  = canvas.getContext('2d');
-let animId;
-let time2 = 0;
+let time2      = 0;
 let visualBeat = 8;
 
 const particles = Array.from({ length: 60 }, () => ({
-  x: Math.random() * window.innerWidth,
-  y: Math.random() * window.innerHeight,
+  x:         Math.random() * window.innerWidth,
+  y:         Math.random() * window.innerHeight,
   size:      Math.random() * 3 + 1,
   speedY:    Math.random() * 0.5 + 0.1,
   phase:     Math.random() * Math.PI * 2,
@@ -801,6 +957,9 @@ function renderFrame() {
   ctx2d.fillRect(0, 0, w, h);
   time2 += 0.016;
 
+  // Particles drift to a cool blue-cyan hue during wind-down
+  const hueBase = isWindingDown ? 195 : 220 + visualBeat * 2;
+
   particles.forEach(p => {
     const speedMult = Math.max(0.2, visualBeat / 10);
     p.y -= p.speedY * speedMult;
@@ -810,29 +969,27 @@ function renderFrame() {
     const alpha = playing
       ? Math.max(0.05, p.baseAlpha + pulse * 0.2)
       : p.baseAlpha * 0.5;
-    const hue = 220 + visualBeat * 2;
 
     ctx2d.beginPath();
     ctx2d.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx2d.fillStyle = `hsla(${hue},60%,70%,${alpha})`;
+    ctx2d.fillStyle = `hsla(${hueBase},60%,70%,${alpha})`;
     ctx2d.fill();
 
     if (playing && pulse > 0.5) {
       ctx2d.shadowBlur  = 15;
-      ctx2d.shadowColor = `hsla(${hue},70%,60%,${alpha})`;
+      ctx2d.shadowColor = `hsla(${hueBase},70%,60%,${alpha})`;
       ctx2d.fill();
-      ctx2d.shadowBlur = 0;
+      ctx2d.shadowBlur  = 0;
     }
   });
 
-  animId = requestAnimationFrame(renderFrame);
+  requestAnimationFrame(renderFrame);
 }
 renderFrame();
 
 // ─────────────────────────────────────────────
 //  BUILD DOM
 // ─────────────────────────────────────────────
-// Carrier buttons
 const carrierGrid = document.getElementById('carrier-grid');
 SOLFEGGIO_FREQS.forEach(f => {
   const btn = document.createElement('button');
@@ -843,11 +1000,10 @@ SOLFEGGIO_FREQS.forEach(f => {
   carrierGrid.appendChild(btn);
 });
 
-// Brainwave buttons
 const waveGrid = document.getElementById('wave-grid');
 BRAINWAVE_STATES.forEach(w => {
   const btn = document.createElement('button');
-  btn.className = 'wave-btn' + (w.value === beatTarget ? ' active' : '');
+  btn.className    = 'wave-btn' + (w.value === beatTarget ? ' active' : '');
   btn.dataset.color = w.color;
   btn.setAttribute('aria-pressed', w.value === beatTarget);
   btn.innerHTML = `
@@ -860,19 +1016,123 @@ BRAINWAVE_STATES.forEach(w => {
 });
 
 // ─────────────────────────────────────────────
+//  TIMER
+// ─────────────────────────────────────────────
+function setTimer(mins) {
+  timerDuration = mins * 60;
+
+  document.querySelectorAll('.timer-btn').forEach(b => {
+    const active = parseInt(b.dataset.mins) === mins;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', active);
+  });
+
+  // Clear any running countdown on change
+  if (timerIntervalId) {
+    clearInterval(timerIntervalId);
+    timerIntervalId = null;
+  }
+  isWindingDown = false;
+  document.getElementById('play-wrap').classList.remove('winding-down');
+
+  timerRemaining = timerDuration;
+  updateTimerDisplay();
+
+  // Start ticking immediately if we're already playing
+  if (playing && timerDuration > 0) startTimerCountdown();
+}
+
+function startTimerCountdown() {
+  if (timerDuration === 0 || timerIntervalId !== null) return;
+
+  timerIntervalId = setInterval(() => {
+    timerRemaining = Math.max(0, timerRemaining - 1);
+    updateTimerDisplay();
+
+    // Begin wind-down when WIND_DOWN_SECS remain
+    if (timerRemaining <= WIND_DOWN_SECS && !isWindingDown && timerRemaining > 0) {
+      isWindingDown = true;
+      document.getElementById('play-wrap').classList.add('winding-down');
+      engine.windDown(WIND_DOWN_SECS);
+    }
+
+    // Countdown hits zero — give audio a moment to breathe before resetting UI
+    if (timerRemaining <= 0) {
+      clearInterval(timerIntervalId);
+      timerIntervalId = null;
+
+      setTimeout(() => {
+        playing       = false;
+        isWindingDown = false;
+        document.getElementById('play-wrap').classList.remove('winding-down');
+        updatePlayUI();
+
+        // Reset timer selection to Off
+        timerDuration  = 0;
+        timerRemaining = 0;
+        document.querySelectorAll('.timer-btn').forEach(b => {
+          const active = parseInt(b.dataset.mins) === 0;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-pressed', active);
+        });
+        updateTimerDisplay();
+      }, 1800);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-countdown');
+  if (!el) return;
+
+  if (timerDuration === 0 || timerRemaining <= 0) {
+    el.textContent = '';
+    el.classList.remove('visible', 'winding');
+    return;
+  }
+
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  el.textContent = `${m}:${String(s).padStart(2, '0')}`;
+  el.classList.add('visible');
+  el.classList.toggle('winding', isWindingDown);
+}
+
+// Wire timer buttons
+document.querySelectorAll('.timer-btn').forEach(btn => {
+  btn.addEventListener('click', () => setTimer(parseInt(btn.dataset.mins)));
+});
+
+// ─────────────────────────────────────────────
 //  ACTIONS
 // ─────────────────────────────────────────────
 function togglePlay() {
   if (!engine) return;
+
   if (playing) {
+    // Manual pause — stop audio and freeze any timer countdown
     engine.stop();
-    playing = false;
+    playing       = false;
+    isWindingDown = false;
+    document.getElementById('play-wrap').classList.remove('winding-down');
+    if (timerIntervalId) {
+      clearInterval(timerIntervalId);
+      timerIntervalId = null;
+    }
   } else {
     engine.currentCarrier = carrier;
     engine.currentBeat    = beatTarget;
     engine.start({ beatVol, noiseVol, stereoWidth, reverbLevel });
     playing = true;
+
+    // Resume (or start) timer if one is selected
+    if (timerDuration > 0) {
+      if (timerRemaining <= 0) timerRemaining = timerDuration;
+      startTimerCountdown();
+    }
   }
+
+  updateTimerDisplay();
   updatePlayUI();
 }
 
@@ -905,8 +1165,8 @@ function setBeatTarget(val) {
 function updatePlayUI() {
   const wrap = document.getElementById('play-wrap');
   const btn  = document.getElementById('play-btn');
-  document.getElementById('icon-play').style.display  = playing ? 'none'  : '';
-  document.getElementById('icon-pause').style.display = playing ? ''      : 'none';
+  document.getElementById('icon-play').style.display  = playing ? 'none' : '';
+  document.getElementById('icon-pause').style.display = playing ? ''     : 'none';
   wrap.classList.toggle('active', playing);
   wrap.setAttribute('aria-pressed', playing);
   btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
@@ -925,19 +1185,17 @@ document.getElementById('settings-btn').addEventListener('click', () => {
   sbtn.setAttribute('aria-expanded', settingsOpen);
 });
 
-// Sliders
-function bindSlider(id, valId, getter, setter, digits = 0) {
-  const input = document.getElementById(id);
+function bindSlider(id, valId, setter) {
+  const input   = document.getElementById(id);
   const display = document.getElementById(valId);
-  const update = () => {
-    const v = parseFloat(input.value);
+  input.addEventListener('input', () => {
+    const v   = parseFloat(input.value);
     setter(v);
     const pct = Math.round(v * 100) + '%';
     display.textContent = pct;
     input.setAttribute('aria-valuetext', pct);
     if (engine && playing) syncMixer();
-  };
-  input.addEventListener('input', update);
+  });
 }
 
 function syncMixer() {
@@ -946,10 +1204,10 @@ function syncMixer() {
   engine.setReverb(reverbLevel);
 }
 
-bindSlider('s-beat',   'v-beat',   () => beatVol,     v => beatVol = v);
-bindSlider('s-noise',  'v-noise',  () => noiseVol,    v => noiseVol = v);
-bindSlider('s-stereo', 'v-stereo', () => stereoWidth, v => stereoWidth = v);
-bindSlider('s-reverb', 'v-reverb', () => reverbLevel, v => reverbLevel = v);
+bindSlider('s-beat',   'v-beat',   v => beatVol     = v);
+bindSlider('s-noise',  'v-noise',  v => noiseVol    = v);
+bindSlider('s-stereo', 'v-stereo', v => stereoWidth = v);
+bindSlider('s-reverb', 'v-reverb', v => reverbLevel = v);
 
 // ─────────────────────────────────────────────
 //  PLAY BUTTON
@@ -960,7 +1218,7 @@ document.getElementById('play-wrap').addEventListener('keydown', e => {
 });
 
 // ─────────────────────────────────────────────
-//  UI FADE (hides controls while playing)
+//  UI FADE
 // ─────────────────────────────────────────────
 let uiTimeout;
 function wakeUI() {
