@@ -481,12 +481,24 @@
       .headphone-badge { font-size: 0.62rem; padding: 0.4rem 0.7rem; }
       main > * + * { margin-top: 2rem; }
       .state-sub { font-size: 0.82rem; flex-wrap: wrap; }
+
+      /* Fit all five states on one row, scaling to the available width */
+      .wave-grid {
+        width: 100%;
+        flex-wrap: nowrap;
+        align-items: stretch;
+      }
       .wave-btn {
-        width: 4.3rem;
-        margin: 0.22rem;
-        padding: 0.7rem 0.45rem;
+        flex: 1;              /* equal share of the row (basis 0%, well-supported) */
+        width: auto;          /* override the fixed desktop width */
+        min-width: 0;         /* allow shrinking below content width */
+        margin: 0 0.2rem;     /* horizontal spacing only */
+        padding: 0.7rem 0.3rem;
         border-radius: 0.85rem;
       }
+      .wave-btn:first-child { margin-left: 0; }
+      .wave-btn:last-child  { margin-right: 0; }
+      .wave-label { white-space: nowrap; }
       .wave-btn svg { width: 1.15rem; height: 1.15rem; }
       .settings-inner { padding: 1.4rem; grid-gap: 1.75rem; gap: 1.75rem; }
       #settings-panel.open { max-height: 1400px; }   /* stacked column is taller */
@@ -494,9 +506,10 @@
 
     @media (max-width: 400px) {
       main > * + * { margin-top: 1.75rem; }
-      .wave-btn   { width: 3.9rem; margin: 0.2rem; padding: 0.6rem 0.35rem; }
-      .wave-label { font-size: 0.64rem; }
-      .wave-hz    { font-size: 0.55rem; }
+      .wave-btn   { margin: 0 0.14rem; padding: 0.6rem 0.2rem; }
+      .wave-label { font-size: 0.62rem; }
+      .wave-hz    { font-size: 0.54rem; }
+      .wave-btn svg { width: 1rem; height: 1rem; }
       .timer-btn  { padding: 0.34rem 0.6rem; font-size: 0.66rem; }
     }
 
