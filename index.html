@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -37,14 +38,14 @@
 
     #bg-canvas {
       position: fixed;
-      inset: 0;
+      top: 0; right: 0; bottom: 0; left: 0;   /* longhand: `inset` unsupported on old Safari */
       z-index: 0;
       pointer-events: none;
     }
 
     #radial-overlay {
       position: fixed;
-      inset: 0;
+      top: 0; right: 0; bottom: 0; left: 0;
       z-index: 1;
       pointer-events: none;
       background: radial-gradient(ellipse at center, rgba(49,46,129,0.18) 0%, rgba(5,11,20,0.85) 60%, #050B14 100%);
@@ -54,11 +55,12 @@
       position: relative;
       z-index: 10;
       width: 100%;
-      min-height: 100vh;
+      min-height: 100vh;          /* fallback for browsers without dvh */
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      padding: 1.5rem;            /* fallback for browsers without clamp() */
       padding: clamp(1.5rem, 4vw, 3rem);
       transition: opacity 1s ease;
     }
@@ -72,6 +74,7 @@
 
     .wordmark {
       font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;          /* fallback */
       font-size: clamp(1.3rem, 2.5vw, 1.75rem);
       letter-spacing: 0.2em;
       color: #c7d2fe;
@@ -90,8 +93,8 @@
     .headphone-badge {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       background: rgba(15,23,42,0.5);
+      -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
       padding: 0.5rem 1rem;
       border-radius: 99px;
@@ -100,6 +103,7 @@
       font-weight: 500;
       color: #94a3b8;
     }
+    .headphone-badge > * + * { margin-left: 0.5rem; }   /* replaces flex gap */
     .headphone-badge svg { color: var(--accent); animation: pulse 2s infinite; }
 
     main {
@@ -108,8 +112,8 @@
       align-items: center;
       justify-content: center;
       flex: 1;
-      gap: clamp(2rem, 5vh, 3.5rem);
     }
+    main > * + * { margin-top: 3rem; }   /* replaces flex gap */
 
     .play-wrap {
       position: relative;
@@ -117,9 +121,10 @@
     }
     .play-glow {
       position: absolute;
-      inset: 0;
+      top: 0; right: 0; bottom: 0; left: 0;
       border-radius: 50%;
       background: var(--accent);
+      -webkit-filter: blur(40px);
       filter: blur(40px);
       opacity: 0.15;
       transition: opacity 1s ease, background 2s ease;
@@ -133,10 +138,12 @@
 
     #play-btn {
       position: relative;
+      width: 7rem;  height: 7rem;   /* fallback */
       width: clamp(6rem, 14vw, 8rem);
       height: clamp(6rem, 14vw, 8rem);
       border-radius: 50%;
       background: rgba(15,23,42,0.8);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       display: flex;
@@ -152,6 +159,7 @@
 
     .state-title {
       font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;             /* fallback */
       font-size: clamp(2.5rem, 7vw, 4.5rem);
       font-weight: 300;
       letter-spacing: -0.01em;
@@ -166,9 +174,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
       margin-top: 0.5rem;
     }
+    .state-sub > * + * { margin-left: 0.75rem; }   /* replaces flex gap */
     .state-dot {
       width: 5px; height: 5px;
       border-radius: 50%;
@@ -179,17 +187,17 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.6rem;
     }
     .wave-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      margin: 0.3rem;              /* per-item margin replaces grid gap */
       padding: 0.9rem 0.7rem;
       border-radius: 1rem;
       border: 1px solid var(--border);
       background: rgba(15,23,42,0.4);
+      -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
       cursor: pointer;
       transition: all 0.4s ease;
@@ -198,6 +206,7 @@
       color: inherit;
       font-family: inherit;
     }
+    .wave-btn > * + * { margin-top: 0.4rem; }   /* replaces flex gap */
     .wave-btn:hover { background: rgba(30,41,59,0.6); border-color: rgba(255,255,255,0.12); }
     .wave-btn.active {
       background: rgba(99,102,241,0.15);
@@ -215,18 +224,18 @@
     .wave-btn[data-color="indigo"].active svg { color: #818cf8; }
     .wave-btn[data-color="slate"].active svg  { color: #94a3b8; }
 
-    /* ── Footer ── */
+    /* Footer */
     footer { width: 100%; max-width: 56rem; margin: 0 auto; }
 
-    /* ── Timer Bar ── */
+    /* Timer Bar */
     .timer-bar {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.85rem;
       margin-bottom: 0.9rem;
       flex-wrap: wrap;
     }
+    .timer-bar > * { margin: 0.25rem 0.42rem; }   /* symmetric margins survive wrapping without flex gap */
     .timer-label-text {
       font-size: 0.62rem;
       font-weight: 600;
@@ -235,7 +244,8 @@
       color: rgba(148,163,184,0.32);
       flex-shrink: 0;
     }
-    .timer-btns { display: flex; gap: 0.35rem; }
+    .timer-btns { display: flex; }
+    .timer-btns > * + * { margin-left: 0.35rem; }   /* replaces flex gap */
     .timer-btn {
       padding: 0.38rem 0.85rem;
       font-size: 0.7rem;
@@ -284,6 +294,7 @@
       border-radius: 50%;
       border: 1px solid var(--border);
       background: rgba(15,23,42,0.5);
+      -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
       cursor: pointer;
       color: #64748b;
@@ -312,12 +323,14 @@
 
     .settings-inner {
       background: rgba(15,23,42,0.65);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 1.5rem;
       padding: 1.75rem;
       display: grid;
       grid-template-columns: 1fr 1fr;
+      grid-gap: 2.5rem;   /* old Safari grid spelling */
       gap: 2.5rem;
     }
     @media (max-width: 640px) { .settings-inner { grid-template-columns: 1fr; } }
@@ -331,13 +344,14 @@
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
     }
+    .settings-label svg { margin-right: 0.4rem; }   /* replaces flex gap */
 
     /* 5 carrier buttons in 2-col grid; 5th auto-spans full width */
     .carrier-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      grid-gap: 0.5rem;
       gap: 0.5rem;
       margin-bottom: 0.75rem;
     }
@@ -360,7 +374,6 @@
       border-color: rgba(99,102,241,0.4);
       color: #c7d2fe;
     }
-    /* Span the lone last button across both columns */
     .carrier-btn:last-child:nth-child(odd) { grid-column: span 2; }
 
     .carrier-note {
@@ -369,15 +382,18 @@
       line-height: 1.5;
     }
 
-    .mixer-col { display: flex; flex-direction: column; gap: 1.25rem; }
-    .slider-row { display: flex; flex-direction: column; gap: 0.4rem; }
+    .mixer-col { display: flex; flex-direction: column; }
+    .mixer-col > * + * { margin-top: 1.25rem; }   /* replaces flex gap */
+    .slider-row { display: flex; flex-direction: column; }
+    .slider-row > * + * { margin-top: 0.4rem; }   /* replaces flex gap */
     .slider-meta {
       display: flex;
       justify-content: space-between;
       font-size: 0.7rem;
       color: #64748b;
     }
-    .slider-meta label { display: flex; align-items: center; gap: 0.3rem; }
+    .slider-meta label { display: flex; align-items: center; }
+    .slider-meta label svg { margin-right: 0.3rem; }   /* replaces flex gap */
     .slider-meta .val { font-variant-numeric: tabular-nums; color: #94a3b8; }
 
     input[type=range] {
@@ -420,17 +436,17 @@
     #error-screen {
       display: none;
       position: fixed;
-      inset: 0;
+      top: 0; right: 0; bottom: 0; left: 0;
       z-index: 100;
       background: var(--bg);
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1rem;
       text-align: center;
       padding: 2rem;
     }
     #error-screen.visible { display: flex; }
+    #error-screen > * + * { margin-top: 1rem; }   /* replaces flex gap */
     #error-screen svg { color: #f59e0b; }
     #error-screen h2 { font-size: 1.25rem; font-weight: 500; }
     #error-screen p  { color: #64748b; font-size: 0.875rem; max-width: 28rem; }
@@ -455,33 +471,35 @@
        ───────────────────────────────────────────── */
     @media (max-width: 680px) {
       #shell {
-        gap: 1.25rem;
+        padding: 1.25rem 1rem;   /* fallback (also the value old Safari keeps) */
         padding-top:    calc(1.25rem + env(safe-area-inset-top, 0px));
         padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
         padding-left:   max(1rem, env(safe-area-inset-left, 0px));
         padding-right:  max(1rem, env(safe-area-inset-right, 0px));
       }
-      header { flex-wrap: wrap; gap: 0.6rem; align-items: flex-start; }
+      header { flex-wrap: wrap; align-items: flex-start; }
       .headphone-badge { font-size: 0.62rem; padding: 0.4rem 0.7rem; }
-      main { gap: clamp(1.75rem, 5vh, 2.75rem); padding: 0.5rem 0; }
-      .state-sub { font-size: 0.82rem; gap: 0.5rem; flex-wrap: wrap; }
-      .wave-grid { gap: 0.45rem; }
-      .wave-btn { width: 4.3rem; padding: 0.7rem 0.45rem; border-radius: 0.85rem; }
+      main > * + * { margin-top: 2rem; }
+      .state-sub { font-size: 0.82rem; flex-wrap: wrap; }
+      .wave-btn {
+        width: 4.3rem;
+        margin: 0.22rem;
+        padding: 0.7rem 0.45rem;
+        border-radius: 0.85rem;
+      }
       .wave-btn svg { width: 1.15rem; height: 1.15rem; }
-      .settings-inner { padding: 1.4rem; gap: 1.75rem; }
-      /* Larger cap so the stacked (single-column) panel never gets clipped */
-      #settings-panel.open { max-height: 1400px; }
+      .settings-inner { padding: 1.4rem; grid-gap: 1.75rem; gap: 1.75rem; }
+      #settings-panel.open { max-height: 1400px; }   /* stacked column is taller */
     }
 
     @media (max-width: 400px) {
-      .wave-btn   { width: 3.9rem; padding: 0.6rem 0.35rem; }
+      main > * + * { margin-top: 1.75rem; }
+      .wave-btn   { width: 3.9rem; margin: 0.2rem; padding: 0.6rem 0.35rem; }
       .wave-label { font-size: 0.64rem; }
       .wave-hz    { font-size: 0.55rem; }
-      .timer-bar  { gap: 0.5rem; }
       .timer-btn  { padding: 0.34rem 0.6rem; font-size: 0.66rem; }
     }
 
-    /* Devices that can't hover (touch): keep focus outlines useful */
     @media (hover: none) {
       #play-btn:focus-visible,
       .wave-btn:focus-visible,
@@ -793,20 +811,25 @@ class BinauralEngine {
     const gainR = this.ctx.createGain();
     gainL.gain.value = gainR.gain.value = volume;
 
-    const panL = this.ctx.createStereoPanner?.() ?? null;
-    const panR = this.ctx.createStereoPanner?.() ?? null;
-
     oscL.connect(gainL);
     oscR.connect(gainR);
 
-    if (panL && panR) {
+    if (typeof this.ctx.createStereoPanner === 'function') {
+      // Modern browsers: StereoPanner gives hard L/R with adjustable width.
+      const panL = this.ctx.createStereoPanner();
+      const panR = this.ctx.createStereoPanner();
       panL.pan.value = -1; panR.pan.value = 1;
       gainL.connect(panL); panL.connect(this.lpf);
       gainR.connect(panR); panR.connect(this.lpf);
       this.panners.push({ l: panL, r: panR });
     } else {
-      gainL.connect(this.lpf);
-      gainR.connect(this.lpf);
+      // Older Safari (no StereoPannerNode): route each ear to a discrete
+      // output channel via a merger so the binaural separation is preserved.
+      // (Stereo-width control is a no-op here — the panner array stays empty.)
+      const merger = this.ctx.createChannelMerger(2);
+      gainL.connect(merger, 0, 0);   // left  ear  -> channel 0
+      gainR.connect(merger, 0, 1);   // right ear  -> channel 1
+      merger.connect(this.lpf);
     }
 
     this.oscillators.push({ oscL, oscR, mult: carrierMult });
@@ -979,7 +1002,14 @@ const ctx2d  = canvas.getContext('2d');
 let time2      = 0;
 let visualBeat = 8;
 
-const particles = Array.from({ length: 60 }, () => ({
+// Older/low-power devices (like an old iPod touch) choke on 60 shadow-blurred
+// particles per frame — scale the effect down when the screen is small or the
+// CPU reports few cores.
+const lowPower = window.innerWidth < 700 ||
+                 (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+const PARTICLE_COUNT = lowPower ? 24 : 60;
+
+const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
   x:         Math.random() * window.innerWidth,
   y:         Math.random() * window.innerHeight,
   size:      Math.random() * 3 + 1,
@@ -1020,7 +1050,7 @@ function renderFrame() {
     ctx2d.fillStyle = `hsla(${hueBase},60%,70%,${alpha})`;
     ctx2d.fill();
 
-    if (playing && pulse > 0.5) {
+    if (playing && pulse > 0.5 && !lowPower) {
       ctx2d.shadowBlur  = 15;
       ctx2d.shadowColor = `hsla(${hueBase},70%,60%,${alpha})`;
       ctx2d.fill();
@@ -1232,8 +1262,12 @@ document.getElementById('settings-btn').addEventListener('click', () => {
   // On small screens the panel expands below the fold — bring it into view
   // once it has finished its open transition.
   if (settingsOpen) {
-    setTimeout(() => {
-      panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    setTimeout(function () {
+      if ('scrollBehavior' in document.documentElement.style) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      } else {
+        panel.scrollIntoView(false);   // old Safari: no smooth-scroll options
+      }
     }, 320);
   }
 });
@@ -1299,7 +1333,7 @@ try {
   document.getElementById('error-screen').classList.add('visible');
 }
 
-window.addEventListener('beforeunload', () => engine?.destroy());
+window.addEventListener('beforeunload', () => { if (engine) engine.destroy(); });
 </script>
 </body>
 </html>
