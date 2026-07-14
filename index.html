@@ -464,6 +464,191 @@
       50%       { opacity: 1;   }
     }
 
+    /* ── Tutorial button (beside the gear) ── */
+    #tutorial-btn {
+      padding: 0.65rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.5);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      color: #64748b;
+      transition: all 0.3s;
+      outline: none;
+      display: flex; align-items: center; justify-content: center;
+      margin-right: 0.6rem;
+    }
+    #tutorial-btn:hover { color: #e2e8f0; border-color: rgba(99,102,241,0.4); }
+    #tutorial-btn.active {
+      background: rgba(99,102,241,0.25);
+      border-color: rgba(99,102,241,0.5);
+      color: #c7d2fe;
+    }
+
+    /* ── Tutorial / Guide overlay ── */
+    #tutorial-overlay {
+      display: none;
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 60;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      background: rgba(5,11,20,0.72);
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    #tutorial-overlay.visible { display: flex; }
+
+    .tutorial-card {
+      position: relative;
+      width: 100%;
+      max-width: 34rem;
+      max-height: 86vh;
+      max-height: 86dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: rgba(12,19,33,0.97);
+      border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 1.5rem;
+      padding: 2rem 1.75rem 1.75rem;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+      -webkit-animation: tutorialIn 0.35s ease;
+      animation: tutorialIn 0.35s ease;
+    }
+
+    #tutorial-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      width: 2rem; height: 2rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.6);
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s;
+      outline: none;
+    }
+    #tutorial-close:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+
+    .tutorial-eyebrow {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(165,180,252,0.55);
+    }
+    #tutorial-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 2rem;
+      color: #fff;
+      margin-top: 0.35rem;
+      letter-spacing: -0.01em;
+    }
+    .tutorial-intro {
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: rgba(203,213,225,0.78);
+      margin-top: 0.7rem;
+    }
+    .tutorial-intro em { color: #c7d2fe; font-style: normal; }
+
+    .tutorial-section { margin-top: 1.75rem; }
+    .tutorial-label {
+      font-size: 0.64rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #818cf8;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tutorial-text {
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: rgba(203,213,225,0.74);
+    }
+    .tutorial-text strong { color: #a5b4fc; font-weight: 500; }
+
+    /* wave rows */
+    .tw-row { display: flex; align-items: flex-start; margin-top: 1.05rem; }
+    .tw-row:first-child { margin-top: 0; }
+    .tw-icon {
+      flex-shrink: 0;
+      width: 2.4rem; height: 2.4rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.6);
+      display: flex; align-items: center; justify-content: center;
+      margin-right: 0.9rem;
+    }
+    .tw-icon svg { width: 1.2rem; height: 1.2rem; color: #64748b; }
+    .tw-icon[data-color="purple"] svg { color: #a78bfa; }
+    .tw-icon[data-color="blue"]   svg { color: #60a5fa; }
+    .tw-icon[data-color="teal"]   svg { color: #2dd4bf; }
+    .tw-icon[data-color="indigo"] svg { color: #818cf8; }
+    .tw-icon[data-color="slate"]  svg { color: #94a3b8; }
+    .tw-body { flex: 1; min-width: 0; }
+    .tw-head { display: flex; align-items: baseline; flex-wrap: wrap; }
+    .tw-name { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; margin-right: 0.55rem; }
+    .tw-hz {
+      font-size: 0.68rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+      color: rgba(129,140,248,0.75);
+    }
+    .tw-desc { font-size: 0.8rem; line-height: 1.55; color: rgba(148,163,184,0.75); margin-top: 0.2rem; }
+
+    /* feature rows */
+    .tutorial-feature { margin-top: 1rem; }
+    .tutorial-feature:first-child { margin-top: 0; }
+    .tf-name { font-size: 0.86rem; font-weight: 500; color: #cbd5e1; margin-bottom: 0.15rem; }
+    .tf-tag {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #818cf8;
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 99px;
+      padding: 0.05rem 0.4rem;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+    .tf-desc { font-size: 0.8rem; line-height: 1.55; color: rgba(148,163,184,0.75); }
+
+    .tutorial-done {
+      display: block;
+      width: 100%;
+      margin-top: 1.9rem;
+      padding: 0.8rem;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.16);
+      color: #c7d2fe;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: all 0.25s;
+      outline: none;
+    }
+    .tutorial-done:hover { background: rgba(99,102,241,0.28); color: #fff; }
+
+    @-webkit-keyframes tutorialIn {
+      from { opacity: 0; -webkit-transform: translateY(12px) scale(0.98); }
+      to   { opacity: 1; -webkit-transform: translateY(0)    scale(1);    }
+    }
+    @keyframes tutorialIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+
     svg { display: block; flex-shrink: 0; }
 
     /* ─────────────────────────────────────────────
@@ -502,6 +687,20 @@
       .wave-btn svg { width: 1.15rem; height: 1.15rem; }
       .settings-inner { padding: 1.4rem; grid-gap: 1.75rem; gap: 1.75rem; }
       #settings-panel.open { max-height: 1400px; }   /* stacked column is taller */
+
+      /* Full-screen guide sheet on phones */
+      #tutorial-overlay { padding: 0; }
+      .tutorial-card {
+        max-width: none;
+        max-height: 100vh;
+        max-height: 100dvh;
+        border-radius: 0;
+        border: none;
+        padding: 1.6rem 1.15rem 1.9rem;
+        padding-top:    calc(1.6rem + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(1.9rem + env(safe-area-inset-bottom, 0px));
+      }
+      #tutorial-title { font-size: 1.7rem; }
     }
 
     @media (max-width: 400px) {
@@ -601,6 +800,13 @@
     </div>
 
     <div class="settings-toggle">
+      <button id="tutorial-btn" aria-label="How it works" aria-haspopup="dialog" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </button>
       <button id="settings-btn" aria-label="Toggle settings" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3"/>
@@ -690,6 +896,63 @@
       </div>
     </div>
   </footer>
+</div>
+
+<!-- ── Tutorial / Guide overlay ── -->
+<div id="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorial-title" aria-hidden="true">
+  <div class="tutorial-card">
+    <button id="tutorial-close" aria-label="Close guide">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="tutorial-eyebrow">Guide</div>
+    <h2 id="tutorial-title">How NeuroSync Works</h2>
+    <p class="tutorial-intro">NeuroSync plays <em>binaural beats</em> — two pure tones, one in each ear, tuned a few hertz apart. Put on <em>stereo headphones</em> and your mind perceives a third, slower pulse at the difference between them. That pulse is what gently nudges your brain toward a chosen rhythm.</p>
+
+    <div class="tutorial-section">
+      <div class="tutorial-label">The Idea</div>
+      <p class="tutorial-text">Play a tone at <strong>174 Hz</strong> on the left and <strong>182 Hz</strong> on the right, and the 8 Hz gap becomes an <strong>Alpha</strong> beat. Choose a state below and NeuroSync sets that gap for you, sliding smoothly whenever you switch.</p>
+    </div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-label">Brainwave States</div>
+      <div id="tutorial-waves"><!-- populated by JS --></div>
+    </div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-label">The Controls</div>
+
+      <div class="tutorial-feature">
+        <div class="tf-name">Play / Pause</div>
+        <div class="tf-desc">The large center button starts and stops the tones. Its glow pulses in time with the current rhythm.</div>
+      </div>
+      <div class="tutorial-feature">
+        <div class="tf-name">Brainwave Selector</div>
+        <div class="tf-desc">Tap Gamma through Delta to pick a target. The beat glides to the new frequency rather than jumping.</div>
+      </div>
+      <div class="tutorial-feature">
+        <div class="tf-name">Session Timer</div>
+        <div class="tf-desc">Choose 5, 10, or 15 minutes. In the final half-minute the sound "breathes" with slow swells, then fades to silence.</div>
+      </div>
+      <div class="tutorial-feature">
+        <div class="tf-name">Solfeggio Carrier <span class="tf-tag">Settings</span></div>
+        <div class="tf-desc">The base tone the beat rides on. Lower carriers feel warmer and less fatiguing over long sessions.</div>
+      </div>
+      <div class="tutorial-feature">
+        <div class="tf-name">Acoustic Mixer <span class="tf-tag">Settings</span></div>
+        <div class="tf-desc">Balance how prominent the beat is, add brown-noise masking, widen the stereo field, and dial in hall reverb.</div>
+      </div>
+      <div class="tutorial-feature">
+        <div class="tf-name">Headphones</div>
+        <div class="tf-desc">Essential — the effect only works when each ear receives its own separate channel.</div>
+      </div>
+    </div>
+
+    <button id="tutorial-done" class="tutorial-done">Got it</button>
+  </div>
 </div>
 
 <script>
@@ -1335,6 +1598,77 @@ function wakeUI() {
 window.addEventListener('mousemove', wakeUI);
 window.addEventListener('touchstart', wakeUI);
 window.addEventListener('keydown', wakeUI);
+
+// ─────────────────────────────────────────────
+//  TUTORIAL / GUIDE
+// ─────────────────────────────────────────────
+const WAVE_DESCRIPTIONS = {
+  Gamma: 'The fastest rhythms, tied to sharp concentration, high-level processing, and flashes of insight.',
+  Beta:  'The everyday waking state — alert and engaged, geared toward focus and active problem-solving.',
+  Alpha: 'A calm, relaxed-but-aware state. The bridge between focused activity and deeper rest.',
+  Theta: 'The drifting state of deep meditation, daydreams, and the edge of sleep, where creativity surfaces.',
+  Delta: 'The slowest rhythms, dominant in deep, dreamless sleep and physical restoration.'
+};
+
+(function buildTutorialWaves() {
+  const box = document.getElementById('tutorial-waves');
+  if (!box) return;
+  BRAINWAVE_STATES.forEach(function (w) {
+    const desc = WAVE_DESCRIPTIONS[w.label] || '';
+    const row = document.createElement('div');
+    row.className = 'tw-row';
+    row.innerHTML =
+      '<span class="tw-icon" data-color="' + w.color + '">' + w.icon + '</span>' +
+      '<div class="tw-body">' +
+        '<div class="tw-head">' +
+          '<span class="tw-name">' + w.label + '</span>' +
+          '<span class="tw-hz">\u2248 ' + w.value + ' Hz</span>' +
+        '</div>' +
+        '<div class="tw-desc">' + desc + '</div>' +
+      '</div>';
+    box.appendChild(row);
+  });
+})();
+
+const tutorialOverlay = document.getElementById('tutorial-overlay');
+const tutorialBtn     = document.getElementById('tutorial-btn');
+
+function openTutorial() {
+  tutorialOverlay.classList.add('visible');
+  tutorialOverlay.setAttribute('aria-hidden', 'false');
+  tutorialBtn.classList.add('active');
+  tutorialBtn.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';   // stop background scroll while open
+  const closeBtn = document.getElementById('tutorial-close');
+  if (closeBtn) closeBtn.focus();
+}
+
+function closeTutorial() {
+  tutorialOverlay.classList.remove('visible');
+  tutorialOverlay.setAttribute('aria-hidden', 'true');
+  tutorialBtn.classList.remove('active');
+  tutorialBtn.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+  tutorialOverlay.scrollTop = 0;
+  const card = tutorialOverlay.querySelector('.tutorial-card');
+  if (card) card.scrollTop = 0;
+}
+
+tutorialBtn.addEventListener('click', openTutorial);
+document.getElementById('tutorial-close').addEventListener('click', closeTutorial);
+document.getElementById('tutorial-done').addEventListener('click', closeTutorial);
+
+// Tapping the dark backdrop (but not the card) closes the guide
+tutorialOverlay.addEventListener('click', function (e) {
+  if (e.target === tutorialOverlay) closeTutorial();
+});
+
+// Escape closes it (keyCode fallback for older browsers)
+window.addEventListener('keydown', function (e) {
+  if ((e.key === 'Escape' || e.keyCode === 27) && tutorialOverlay.classList.contains('visible')) {
+    closeTutorial();
+  }
+});
 
 // ─────────────────────────────────────────────
 //  INIT
